@@ -10,16 +10,44 @@ import {
   Check,
   Mail,
   FileText,
+  Upload,
+  Loader2,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 
-export function AgreementAudit() {
+interface AgreementAuditProps {
+  customAnalysis?: ContractAnalysis | null;
+  isAnalyzing?: boolean;
+  analysisError?: string | null;
+  onFileSelect?: (file: File) => void;
+  onResetCustom?: () => void;
+}
+
+export function AgreementAudit({
+  customAnalysis,
+  isAnalyzing,
+  analysisError,
+  onFileSelect,
+  onResetCustom,
+}: AgreementAuditProps) {
   const [activePreset, setActivePreset] = useState<string>("employment");
   const [expandedId, setExpandedId] = useState<string>("c-1");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (customAnalysis) {
+      setActivePreset("custom");
+      setExpandedId(customAnalysis.clauses[0]?.id || "");
+    }
+  }, [customAnalysis]);
 
   const contract: ContractAnalysis =
-    SAMPLE_CONTRACTS[activePreset] || SAMPLE_CONTRACTS.employment;
+    activePreset === "custom" && customAnalysis
+      ? customAnalysis
+      : SAMPLE_CONTRACTS[activePreset] || SAMPLE_CONTRACTS.employment;
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -31,6 +59,13 @@ export function AgreementAudit() {
     navigator.clipboard.writeText(text);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileSelect) {
+      onFileSelect(file);
+    }
   };
 
   const getSeverityIndicator = (severity: string) => {
@@ -57,6 +92,9 @@ export function AgreementAudit() {
   };
 
   const tabs = [
+    ...(customAnalysis
+      ? [{ key: "custom", label: "Uploaded Audit" }]
+      : []),
     { key: "employment", label: "Tech Offer" },
     { key: "rental", label: "Apartment Lease" },
     { key: "freelance", label: "Consulting SOW" },
@@ -77,36 +115,89 @@ export function AgreementAudit() {
                 </span>
               </h2>
               <p className="mt-3 text-base text-[var(--paper-dim)] font-normal max-w-lg">
-                Select an agreement type to see exactly how Signwise identifies
+                Upload your own agreement or select a preset to see exactly how Signwise identifies
                 non-market terms and generates counter-proposals.
               </p>
             </div>
 
-            {/* Tab Switcher — text-only with active gold underline */}
-            <div className="flex items-center gap-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => {
-                    setActivePreset(tab.key);
-                    setExpandedId(
-                      SAMPLE_CONTRACTS[tab.key]?.clauses[0]?.id || ""
-                    );
-                  }}
-                  className={`text-xs sm:text-sm font-mono tracking-wider uppercase pb-2 border-b-2 font-medium transition-all duration-200 ${
-                    activePreset === tab.key
-                      ? "text-white border-[var(--gold)] font-bold"
-                      : "text-[var(--paper-muted)] border-transparent hover:text-white"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Controls: Tab Switcher + Upload Action */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt"
+                className="hidden"
+                onChange={handleFileInput}
+              />
+
+              <div className="flex items-center gap-4 sm:gap-6">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      setActivePreset(tab.key);
+                      if (tab.key === "custom" && customAnalysis) {
+                        setExpandedId(customAnalysis.clauses[0]?.id || "");
+                      } else {
+                        setExpandedId(
+                          SAMPLE_CONTRACTS[tab.key]?.clauses[0]?.id || ""
+                        );
+                      }
+                    }}
+                    className={`text-xs sm:text-sm font-mono tracking-wider uppercase pb-2 border-b-2 font-medium transition-all duration-200 ${
+                      activePreset === tab.key
+                        ? "text-white border-[var(--gold)] font-bold"
+                        : "text-[var(--paper-muted)] border-transparent hover:text-white"
+                    }`}
+                  >
+                    {tab.key === "custom" && (
+                      <Sparkles className="inline h-3 w-3 mr-1 text-[var(--gold)]" />
+                    )}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isAnalyzing}
+                className="btn-editorial text-xs py-1.5 px-3 flex items-center gap-1.5 font-mono"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                <span>Upload File</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Document Metadata Bar */}
+        {/* Error Alert */}
+        {analysisError && (
+          <div className="mb-6 p-4 rounded-lg border border-[var(--signal-danger-border)] bg-[var(--signal-danger-bg)] flex items-center gap-3 text-sm text-[var(--signal-danger)]">
+            <AlertTriangle className="h-5 w-5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">Analysis Notice</p>
+              <p className="text-xs text-[var(--paper-dim)] mt-0.5">{analysisError}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isAnalyzing && (
+          <div className="py-24 rounded-lg border border-white/[0.08] bg-[var(--ink-surface)] flex flex-col items-center justify-center text-center px-6">
+            <Loader2 className="h-8 w-8 text-[var(--gold)] animate-spin mb-4" />
+            <h3 className="headline-editorial text-xl font-normal text-white">
+              Parsing and auditing agreement...
+            </h3>
+            <p className="text-xs font-mono text-[var(--paper-muted)] mt-2 max-w-md">
+              Extracting legal clauses, evaluating restrictive obligations, and drafting plain-English counter-proposals with Gemini AI.
+            </p>
+          </div>
+        )}
+
+        {/* Document Content */}
+        {!isAnalyzing && (
+          <>
+            {/* Document Metadata Bar */}
         <div className="reveal flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 rounded-t-lg bg-[var(--ink-surface)] border border-white/[0.08] border-b-0">
           <div className="flex items-center gap-3.5">
             <FileText className="h-5 w-5 text-[var(--gold)] shrink-0" />
@@ -291,7 +382,9 @@ export function AgreementAudit() {
             ))}
           </div>
         </div>
-      </div>
-    </section>
-  );
+      </>
+    )}
+  </div>
+</section>
+);
 }

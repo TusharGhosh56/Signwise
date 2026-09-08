@@ -17,7 +17,6 @@ export function Navbar({ onUploadClick }: NavbarProps) {
             Signwise
           </span>
           <span className="text-[11px] font-mono text-[var(--paper-muted)] tracking-widest uppercase hidden sm:inline font-medium">
-            est. 2026
           </span>
         </Link>
 

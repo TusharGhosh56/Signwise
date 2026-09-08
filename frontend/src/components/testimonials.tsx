@@ -406,7 +406,6 @@ export function TestimonialsSection() {
               </div>
 
               <div className="text-[11px] font-mono text-[var(--paper-muted)] tracking-wider uppercase">
-                Clause Inspection Archive &mdash; Pre-Execution Case Studies
               </div>
             </div>
           </div>

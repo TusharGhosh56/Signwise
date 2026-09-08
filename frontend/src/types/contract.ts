@@ -66,3 +66,15 @@ export interface ContractAnalysis {
   financialTerms: FinancialItem[];
   questionsBeforeSigning: SuggestedQuestionItem[];
 }
+
+export interface ChatQueryRequest {
+  question: string;
+  documentText?: string;
+  analysis?: ContractAnalysis;
+}
+
+export interface ChatQueryResponse {
+  answer: string;
+  referencedSectionRefs?: string[];
+  suggestedAction?: string;
+}

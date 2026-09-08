@@ -199,7 +199,7 @@ export function HeroSlideshow({
                 className="btn-editorial w-fit disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Upload className={`h-4 w-4 ${isAnalyzing ? "animate-spin" : ""}`} />
-                <span>{isAnalyzing ? "Analyzing Document..." : "Upload Agreement"}</span>
+                <span>{isAnalyzing ? "Analyzing Document..." : "Upload Document"}</span>
                 <ArrowRight className="h-4 w-4 ml-1 opacity-70" />
               </button>
 

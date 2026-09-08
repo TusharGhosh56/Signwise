@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { HeroSlideshow } from "@/components/hero-slideshow";
-import { AgreementAudit } from "@/components/agreement-audit";
+import { CapabilitiesSection } from "@/components/capabilities";
 import { ThreeQuestions } from "@/components/three-questions";
 import { TestimonialsSection } from "@/components/testimonials";
 import { TrustVault } from "@/components/trust-vault";
@@ -13,7 +13,7 @@ import { useAnalysis } from "@/context/analysis-context";
 
 export default function HomePage() {
   const router = useRouter();
-  const { analyzeFile, isAnalyzing, currentAnalysis, analysisError } = useAnalysis();
+  const { analyzeFile, isAnalyzing } = useAnalysis();
 
   const handleFileUpload = async (file: File) => {
     // Navigate immediately to dedicated analysis page to show analysis progress
@@ -32,7 +32,10 @@ export default function HomePage() {
   return (
     <div className="relative min-h-screen">
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar onUploadClick={handleReviewClick} />
+        <Navbar
+          onUploadClick={handleReviewClick}
+          onFileSelected={handleFileUpload}
+        />
 
         <main className="flex-1">
           {/* I. The Opening Statement */}
@@ -51,12 +54,10 @@ export default function HomePage() {
           {/* Chapter break */}
           <div className="chapter-rule mx-auto max-w-5xl" />
 
-          {/* III. The Dossier */}
-          <AgreementAudit
-            customAnalysis={currentAnalysis}
-            isAnalyzing={isAnalyzing}
-            analysisError={analysisError}
+          {/* III. Core Capabilities & Protections */}
+          <CapabilitiesSection
             onFileSelect={handleFileUpload}
+            onReviewClick={handleReviewClick}
           />
 
           {/* Chapter break */}

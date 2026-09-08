@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sansFont.variable} ${serifFont.variable} ${monoFont.variable} light h-full antialiased`}
+      className={`${sansFont.variable} ${serifFont.variable} ${monoFont.variable} light h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {/* Subtle grain texture for print-magazine feel */}

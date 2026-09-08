@@ -184,6 +184,14 @@ export default function AnalysisPage() {
   const fairnessScore = Math.max(35, Math.min(96, 100 - rawDeduction));
 
   const getAsymmetryLabel = (score: number) => {
+    if (currentAnalysis?.documentCategory === "OTHER") {
+      return {
+        label: "INFORMATIONAL / NON-AGREEMENT DOCUMENT",
+        color: "text-[var(--signal-safe)]",
+        dotClass: "status-dot-safe",
+        toneText: "No restrictive legal covenants or counterparty obligations detected.",
+      };
+    }
     if (score < 55) {
       return {
         label: "HEAVILY ASYMMETRIC (ONE-SIDED COUNTERPARTY LEVERAGE)",
@@ -242,13 +250,13 @@ export default function AnalysisPage() {
             </Link>
           </div>
 
-          {/* Quick Actions: Decluttered, essential controls only */}
-          <div className="flex items-center gap-3">
+          {/* Quick Actions: Decluttered, unified controls */}
+          <div className="flex items-center gap-2.5">
             {/* Theme Toggle Button: Light <-> Dark */}
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[var(--border-subtle)] bg-[var(--ink-surface)] text-[var(--paper-dim)] hover:text-[var(--paper)] hover:border-[var(--gold)] transition-colors label-mono text-xs"
+              className="btn btn-sm btn-secondary"
             >
               {theme === "dark" ? (
                 <>
@@ -268,8 +276,8 @@ export default function AnalysisPage() {
               <button
                 onClick={() => window.print()}
                 disabled={isAnalyzing}
-                title="Download or Print PDF Dossier"
-                className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1.5 font-mono"
+                title="Download or Print PDF Audit Report"
+                className="btn btn-sm btn-secondary"
               >
                 <Download className="h-3.5 w-3.5 text-[var(--gold)]" />
                 <span>Export PDF</span>
@@ -279,7 +287,7 @@ export default function AnalysisPage() {
             {/* Upload File CTA */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="btn-editorial text-xs py-2 px-3.5 flex items-center gap-1.5 font-mono uppercase tracking-wider"
+              className="btn btn-sm btn-primary"
             >
               <Upload className="h-3.5 w-3.5" />
               <span>Upload Doc</span>
@@ -317,7 +325,7 @@ export default function AnalysisPage() {
         </nav>
       )}
 
-      {/* Main Analysis Dossier */}
+      {/* Main Analysis Report */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-14 space-y-24">
         {/* Empty State: Prompt user to upload their agreement */}
         {!currentAnalysis && !isAnalyzing && (
@@ -422,7 +430,7 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              {/* The Dossier Balance & Asymmetry Card */}
+              {/* The Audit Balance & Asymmetry Card */}
               <div className="product-card rounded-xl overflow-hidden border border-[var(--border-subtle)]">
                 {/* Product Card Top Window Header */}
                 <div className="flex items-center justify-between px-6 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--ink-surface)]">
@@ -501,7 +509,9 @@ export default function AnalysisPage() {
                       </div>
                       <p className="text-[13px] text-[var(--paper-dim)] leading-relaxed font-normal">
                         {rightClauses[0]?.whatItMeans ||
-                          "Guaranteed base compensation and standard mutual confidentiality clauses safeguard your earnings."}
+                          (currentAnalysis.documentCategory === "OTHER"
+                            ? "No specific counterparty protective clauses isolated."
+                            : "Guaranteed base compensation and standard mutual confidentiality clauses safeguard your position.")}
                       </p>
                     </div>
 
@@ -513,7 +523,9 @@ export default function AnalysisPage() {
                       </div>
                       <p className="text-[13px] text-[var(--paper-dim)] leading-relaxed font-normal">
                         {wrongClauses[0]?.whatItMeans ||
-                          "Aggressive restrictive covenants (such as prolonged notice periods or weekend IP claims) work heavily against your mobility."}
+                          (wrongClauses.length === 0
+                            ? "No aggressive non-market traps or asymmetric liabilities detected."
+                            : "Aggressive restrictive covenants work heavily against your mobility.")}
                       </p>
                     </div>
 
@@ -525,7 +537,9 @@ export default function AnalysisPage() {
                       </div>
                       <p className="text-[13px] text-[var(--paper-dim)] leading-relaxed font-normal">
                         {reviewClauses[0]?.whatItMeans ||
-                          "Discretionary conditions or vague separation rules require formal written clarification before signing."}
+                          (reviewClauses.length === 0
+                            ? "No ambiguous clauses or vague terms requiring formal clarification."
+                            : "Discretionary conditions or vague separation rules require formal written clarification before signing.")}
                       </p>
                     </div>
                   </div>
@@ -585,7 +599,7 @@ export default function AnalysisPage() {
                   <div className="pt-2 flex justify-start">
                     <button
                       onClick={() => scrollToSection("things-wrong")}
-                      className="btn-editorial text-xs py-3 px-6 flex items-center gap-2 font-mono uppercase tracking-wider"
+                      className="btn btn-md btn-primary"
                     >
                       <span>Begin Guided Examination (Step 1: Inspect Traps)</span>
                       <ArrowRight className="h-4 w-4" />
@@ -617,7 +631,22 @@ export default function AnalysisPage() {
 
               {/* Cards List */}
               <div className="space-y-8">
-                {wrongClauses.map((clause: ClauseBreakdown, idx: number) => (
+                {wrongClauses.length === 0 ? (
+                  <div className="product-card rounded-xl p-8 border border-[var(--border-subtle)] text-center space-y-3">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-[var(--signal-safe-bg)] border border-[var(--signal-safe)] flex items-center justify-center">
+                      <CheckCircle2 className="h-6 w-6 text-[var(--signal-safe)]" />
+                    </div>
+                    <h3 className="font-sans text-lg font-semibold text-[var(--paper)]">
+                      No High-Risk Traps Detected
+                    </h3>
+                    <p className="text-sm text-[var(--paper-dim)] max-w-lg mx-auto leading-relaxed">
+                      {currentAnalysis.documentCategory === "OTHER"
+                        ? "This document is not a restrictive contract. No predatory covenants, 90-day lock-ins, or IP claims were detected."
+                        : "Signwise did not identify any non-market red flags or heavily asymmetric traps in this agreement."}
+                    </p>
+                  </div>
+                ) : (
+                  wrongClauses.map((clause: ClauseBreakdown, idx: number) => (
                   <div
                     key={clause.id}
                     className="product-card rounded-xl overflow-hidden border border-[var(--border-subtle)] shadow-2xl"
@@ -692,7 +721,7 @@ export default function AnalysisPage() {
                           </span>
                           <button
                             onClick={() => handleCopy(clause.whatToAsk, clause.id)}
-                            className="btn-ghost text-xs"
+                            className="btn btn-sm btn-secondary"
                           >
                             {copiedId === clause.id ? (
                               <>
@@ -716,17 +745,17 @@ export default function AnalysisPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )))}
               </div>
 
               {/* Next Step Jumper */}
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={() => scrollToSection("things-right")}
-                  className="btn-ghost text-xs py-2 px-4 flex items-center gap-2 font-mono uppercase tracking-wider"
+                  className="btn btn-md btn-secondary"
                 >
                   <span>Next: Inspect Protections (Step 2)</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[var(--signal-safe)]" />
+                  <ChevronRight className="h-4 w-4 text-[var(--signal-safe)]" />
                 </button>
               </div>
             </section>
@@ -752,51 +781,61 @@ export default function AnalysisPage() {
               </div>
 
               <div className="space-y-5">
-                {rightClauses.map((clause: ClauseBreakdown) => (
-                  <div
-                    key={clause.id}
-                    className="product-card rounded-xl p-6 sm:p-7 border border-[var(--border-subtle)] space-y-4"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="status-dot status-dot-safe" />
-                        <span className="label-mono text-xs font-bold text-[var(--signal-safe)] tracking-wider">
-                          STANDARD &amp; PROTECTED TERM
+                {rightClauses.length === 0 ? (
+                  <div className="product-card rounded-xl p-8 border border-[var(--border-subtle)] text-center space-y-3">
+                    <p className="text-sm text-[var(--paper-dim)] max-w-lg mx-auto leading-relaxed">
+                      {currentAnalysis.documentCategory === "OTHER"
+                        ? "No standard bilateral contractual protections to report (informational/non-agreement document)."
+                        : "No specific market-standard clauses were isolated."}
+                    </p>
+                  </div>
+                ) : (
+                  rightClauses.map((clause: ClauseBreakdown) => (
+                    <div
+                      key={clause.id}
+                      className="product-card rounded-xl p-6 sm:p-7 border border-[var(--border-subtle)] space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="status-dot status-dot-safe" />
+                          <span className="label-mono text-xs font-bold text-[var(--signal-safe)] tracking-wider">
+                            STANDARD &amp; PROTECTED TERM
+                          </span>
+                        </div>
+                        <span className="font-mono text-xs text-[var(--paper-muted)]">
+                          {clause.sectionRef} &bull; {clause.category}
                         </span>
                       </div>
-                      <span className="font-mono text-xs text-[var(--paper-muted)]">
-                        {clause.sectionRef} &bull; {clause.category}
-                      </span>
-                    </div>
 
-                    <h3 className="text-lg sm:text-xl font-bold text-[var(--paper)] font-sans">
-                      {clause.title}
-                    </h3>
+                      <h3 className="text-lg sm:text-xl font-bold text-[var(--paper)] font-sans">
+                        {clause.title}
+                      </h3>
 
-                    <p className="text-[14px] text-[var(--paper-dim)] leading-relaxed font-normal">
-                      {clause.whatItMeans}
-                    </p>
-
-                    <div className="rounded-lg p-4 border-l-4 border-l-[var(--signal-safe)] bg-[var(--signal-safe-bg)] border border-[var(--border-subtle)]">
-                      <div className="label-mono text-[11px] font-bold text-[var(--signal-safe)] mb-1">
-                        RECOMMENDED ACTION
-                      </div>
-                      <p className="text-xs text-[var(--paper)] font-mono">
-                        {clause.whatToAsk}
+                      <p className="text-[14px] text-[var(--paper-dim)] leading-relaxed font-normal">
+                        {clause.whatItMeans}
                       </p>
+
+                      <div className="rounded-lg p-4 border-l-4 border-l-[var(--signal-safe)] bg-[var(--signal-safe-bg)] border border-[var(--border-subtle)]">
+                        <div className="label-mono text-[11px] font-bold text-[var(--signal-safe)] mb-1">
+                          RECOMMENDED ACTION
+                        </div>
+                        <p className="text-xs text-[var(--paper)] font-mono">
+                          {clause.whatToAsk}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Next Step Jumper */}
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={() => scrollToSection("surrendered-rights")}
-                  className="btn-ghost text-xs py-2 px-4 flex items-center gap-2 font-mono uppercase tracking-wider"
+                  className="btn btn-md btn-secondary"
                 >
                   <span>Next: Surrendered Rights (Step 3)</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  <ChevronRight className="h-4 w-4 text-[var(--gold)]" />
                 </button>
               </div>
             </section>
@@ -841,10 +880,10 @@ export default function AnalysisPage() {
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={() => scrollToSection("obligations-finances")}
-                  className="btn-ghost text-xs py-2 px-4 flex items-center gap-2 font-mono uppercase tracking-wider"
+                  className="btn btn-md btn-secondary"
                 >
                   <span>Next: Obligations Ledger (Step 4)</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  <ChevronRight className="h-4 w-4 text-[var(--gold)]" />
                 </button>
               </div>
             </section>
@@ -981,10 +1020,10 @@ export default function AnalysisPage() {
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={() => scrollToSection("negotiation-playbook")}
-                  className="btn-ghost text-xs py-2 px-4 flex items-center gap-2 font-mono uppercase tracking-wider"
+                  className="btn btn-md btn-secondary"
                 >
                   <span>Next: Counter-Offer Playbook (Step 5)</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  <ChevronRight className="h-4 w-4 text-[var(--gold)]" />
                 </button>
               </div>
             </section>
@@ -1068,7 +1107,7 @@ export default function AnalysisPage() {
                                 currentAnalysis.questionsBeforeSigning[activeEmailTab].emailSnippet
                               )
                             }
-                            className="btn-editorial text-xs py-1.5 px-3 flex items-center gap-1.5 font-mono"
+                            className="btn btn-sm btn-primary"
                           >
                             {copiedEmail ? (
                               <>
@@ -1172,7 +1211,7 @@ export default function AnalysisPage() {
                   <button
                     type="submit"
                     disabled={!chatQuestion.trim() || isChatLoading}
-                    className="btn-editorial text-xs py-3 px-5 flex items-center gap-2 font-mono uppercase tracking-wider disabled:opacity-50"
+                    className="btn btn-md btn-primary disabled:opacity-50"
                   >
                     <Send className="h-3.5 w-3.5" />
                     <span>Inquire</span>
@@ -1184,7 +1223,7 @@ export default function AnalysisPage() {
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {/* PRINT-ONLY EXECUTIVE LEGAL DOSSIER (Rendered solely during PDF Export) */}
+        {/* PRINT-ONLY EXECUTIVE LEGAL REPORT (Rendered solely during PDF Export)  */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {currentAnalysis && (
           <div className="print-only w-full max-w-4xl mx-auto p-4 sm:p-8 bg-white text-slate-900 font-sans space-y-8">
@@ -1193,7 +1232,7 @@ export default function AnalysisPage() {
               <div>
                 <span className="font-serif italic text-3xl font-bold text-slate-900">Signwise</span>
                 <span className="ml-3 text-xs font-mono font-bold uppercase tracking-widest text-amber-700">
-                  CONFIDENTIAL LEGAL INTELLIGENCE DOSSIER
+                  CONFIDENTIAL EXECUTIVE LEGAL REPORT
                 </span>
               </div>
               <div className="text-right text-xs font-mono text-slate-500">
@@ -1429,7 +1468,7 @@ export default function AnalysisPage() {
               </div>
             )}
 
-            {/* Dossier Legal Verification Seal & Notice */}
+            {/* Audit Legal Verification Seal & Notice */}
             <div className="border-t-2 border-slate-300 pt-4 text-[10px] font-mono text-slate-500 flex justify-between items-center break-inside-avoid">
               <div>
                 <strong>SIGNWISE EPHEMERAL AUDIT</strong> &bull; Zero document retention &bull; Generated for counterparty evaluation

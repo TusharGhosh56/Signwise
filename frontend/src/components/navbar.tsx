@@ -1,15 +1,33 @@
 "use client";
 
+import React, { useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Sun, Moon } from "lucide-react";
+import { ArrowRight, Sun, Moon, Upload } from "lucide-react";
 import { useAnalysis } from "@/context/analysis-context";
 
 interface NavbarProps {
   onUploadClick?: () => void;
+  onFileSelected?: (file: File) => void;
 }
 
-export function Navbar({ onUploadClick }: NavbarProps) {
+export function Navbar({ onUploadClick, onFileSelected }: NavbarProps) {
   const { theme, toggleTheme } = useAnalysis();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    if (onFileSelected && fileInputRef.current) {
+      fileInputRef.current.click();
+    } else if (onUploadClick) {
+      onUploadClick();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileSelected) {
+      onFileSelected(file);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[var(--ink)]/90 backdrop-blur-md">
@@ -23,46 +41,14 @@ export function Navbar({ onUploadClick }: NavbarProps) {
           </span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-mono tracking-wider uppercase text-[var(--paper-dim)] font-medium">
-          <a
-            href="#core-questions"
-            className="hover:text-white transition-colors duration-200"
-          >
-            Method
-          </a>
-          <a
-            href="#dossier-preview"
-            className="hover:text-white transition-colors duration-200"
-          >
-            Live Audit
-          </a>
-          <Link
-            href="/analysis"
-            className="hover:text-white transition-colors duration-200 text-[var(--gold)]"
-          >
-            Dossier
-          </Link>
-          <a
-            href="#testimonials"
-            className="hover:text-white transition-colors duration-200"
-          >
-            Stories
-          </a>
-          <a
-            href="#security-vault"
-            className="hover:text-white transition-colors duration-200"
-          >
-            Trust
-          </a>
-        </nav>
+        
 
-        {/* Right Actions: Theme Toggle + Review Agreement */}
-        <div className="flex items-center gap-4">
+        {/* Right Actions: Theme Toggle + Upload Document Action */}
+        <div className="flex items-center gap-2.5">
           <button
             onClick={toggleTheme}
             title={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[var(--border-subtle)] bg-[var(--ink-surface)] text-[var(--paper-dim)] hover:text-[var(--paper)] hover:border-[var(--gold)] transition-colors label-mono text-xs"
+            className="btn btn-sm btn-secondary"
           >
             {theme === "dark" ? (
               <>
@@ -77,12 +63,20 @@ export function Navbar({ onUploadClick }: NavbarProps) {
             )}
           </button>
 
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.txt"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
           <button
-            onClick={onUploadClick}
-            className="group flex items-center gap-2 text-xs font-mono tracking-wider uppercase text-[var(--gold)] hover:text-white transition-colors duration-200 font-semibold"
+            onClick={handleButtonClick}
+            className="btn btn-sm btn-primary"
           >
-            <span>Review Agreement</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <Upload className="h-3.5 w-3.5 mr-1" />
+            <span>Upload Document</span>
           </button>
         </div>
       </div>

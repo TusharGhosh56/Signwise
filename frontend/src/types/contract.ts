@@ -6,7 +6,8 @@ export type DocumentCategory =
   | "FREELANCE_SERVICES"
   | "FINANCIAL_LOAN"
   | "NDA_CONFIDENTIALITY"
-  | "CONSUMER_TERMS";
+  | "CONSUMER_TERMS"
+  | "OTHER";
 
 export interface ClauseBreakdown {
   id: string;

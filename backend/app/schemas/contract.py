@@ -11,6 +11,7 @@ DocumentCategory = Literal[
     "FINANCIAL_LOAN",
     "NDA_CONFIDENTIALITY",
     "CONSUMER_TERMS",
+    "OTHER",
 ]
 
 FinancialCategory = Literal["FIXED", "VARIABLE", "DEPOSIT", "PENALTY", "OTHER"]

@@ -1,7 +1,9 @@
+import asyncio
 import json
 import logging
 import uuid
 from typing import Optional
+from fastapi import HTTPException
 from app.core.config import settings
 from app.schemas.contract import (
     ContractAnalysis,
@@ -17,21 +19,38 @@ You are Signwise, an expert legal contract translation and risk-auditing intelli
 Your core principle is: "Know what you're agreeing to before you sign."
 You explain contracts like a trusted, razor-sharp human advisor—clear, grounded, calm, and practical.
 
-CRITICAL EDITORIAL GUIDELINES:
-1. DO NOT use generic AI filler, alarmist red flags, or vague legal summaries.
-2. Every clause breakdown MUST have 4 distinct components:
-   - whatItSays: 1-sentence translation in crisp, plain English.
-   - whatItMeans: The practical consequence for the signer's daily life or career.
-   - whyItMatters: Why the signer should care (financial loss, mobility restriction, asymmetric risk).
-   - whatToAsk: A direct, professional question or counter-proposal to ask HR / the counterparty.
-3. Categorize document severity:
-   - HIGH: Aggressive or non-market terms (e.g. 90+ day notice, all-encompassing 24/7 personal IP assignment, global non-compete, 100% cliff clawback, pre-payment copyright surrender).
-   - MEDIUM: Terms worth reviewing or clarifying (unclear expense timelines, short inspection windows, standard probation conditions).
-   - LOW: Standard market-norm symmetric provisions.
-4. Extract all financial items (fixed salary/rent, variable bonuses/deposits, conditional penalties).
-5. Extract explicit obligations for both the user (signer) and counterparty.
-6. Provide an explicit list of "whatYouAreGivingUp" (rights, flexibility, leverage ceded).
-7. Draft 2-3 polite, ready-to-send negotiation email snippets.
+CRITICAL INSTRUCTIONS:
+1. ACCURATELY IDENTIFY DOCUMENT TYPE:
+   - Determine whether the text is a binding legal contract/agreement (e.g. Employment Offer/Agreement, NDA, Residential/Commercial Lease, Consulting/Freelance Agreement, Loan Agreement, SaaS Terms of Service, Licensing Agreement, Partnership Agreement).
+   - NON-CONTRACT / NON-AGREEMENT HANDLING:
+     If the document is NOT a legal contract or agreement (such as a technical security scan report, vulnerability audit, invoice, receipt, resume, research paper, marketing brochure, or meeting notes):
+     * Set documentCategory to "OTHER".
+     * Set documentTitle accurately based on the document text (e.g. "Security Scan Report - Attack Surface Monitoring" or the actual report header).
+     * Set overallRisk to "LOW".
+     * In headlineSummary, explicitly state what the document is, for example:
+       "This document is a technical security audit / scan report and does not constitute a legally binding agreement. It contains infrastructure and security posture findings, but no restrictive legal covenants, employment restrictions, or counterparty obligations were detected."
+     * Do NOT hallucinate employment clauses, 90-day resignation notices, intellectual property transfers, or legal traps that do not exist in the text!
+     * Set clauses to [] (an empty list) unless there are actual enforceable legal terms.
+     * Set obligations to empty { "userMust": [], "counterpartyMust": [] }.
+     * Set whatYouAreGivingUp to [] (an empty list).
+     * Set financialTerms to [] (or extract actual invoice amounts if an invoice).
+     * Set questionsBeforeSigning to [] (or 1-2 relevant technical follow-up questions).
+
+2. FOR REAL LEGAL CONTRACTS & AGREEMENTS:
+   - DO NOT use generic AI filler, alarmist red flags, or vague legal summaries.
+   - Every clause breakdown MUST have 4 distinct components:
+     * whatItSays: 1-sentence translation in crisp, plain English.
+     * whatItMeans: The practical consequence for the signer's daily life or career.
+     * whyItMatters: Why the signer should care (financial loss, mobility restriction, asymmetric risk).
+     * whatToAsk: A direct, professional question or counter-proposal to ask HR / the counterparty.
+   - Categorize document severity:
+     * HIGH: Aggressive or non-market terms (e.g. 90+ day notice, all-encompassing 24/7 personal IP assignment, global non-compete, 100% cliff clawback, pre-payment copyright surrender).
+     * MEDIUM: Terms worth reviewing or clarifying (unclear expense timelines, short inspection windows, standard probation conditions).
+     * LOW: Standard market-norm symmetric provisions.
+   - Extract all financial items (fixed salary/rent, variable bonuses/deposits, conditional penalties).
+   - Extract explicit obligations for both the user (signer) and counterparty.
+   - Provide an explicit list of "whatYouAreGivingUp" (rights, flexibility, leverage ceded).
+   - Draft 2-3 polite, ready-to-send negotiation email snippets.
 """
 
 QNA_SYSTEM_PROMPT = """
@@ -60,58 +79,85 @@ class GeminiAnalyzerService:
         file_name: str = "Agreement.pdf"
     ) -> ContractAnalysis:
         """
-        Runs comprehensive contract analysis using Gemini 2.0 Flash with structured output.
-        Falls back to deterministic mock analysis if no API key is available.
+        Runs comprehensive contract analysis using Gemini with structured output.
+        Retries transient errors and fails transparently instead of returning fake data.
         """
         if not self.client:
-            logger.warning("No valid GEMINI_API_KEY configured. Returning mock analysis for demonstration.")
+            logger.warning("No valid GEMINI_API_KEY configured. Returning mock analysis for local offline demo.")
             return get_mock_contract_analysis(file_name=file_name, text_snippet=contract_text[:500])
 
-        try:
-            from google.genai import types
+        from google.genai import types
 
-            prompt = f"""
-Analyze the following legal agreement text in full detail according to the ContractAnalysis schema.
+        prompt = f"""
+Analyze the following document text in full detail according to the ContractAnalysis schema.
 
 File Name: {file_name}
 
-=== BEGIN CONTRACT TEXT ===
+=== BEGIN DOCUMENT TEXT ===
 {contract_text[:120000]}
-=== END CONTRACT TEXT ===
+=== END DOCUMENT TEXT ===
 """
 
-            response = self.client.models.generate_content(
-                model=settings.GEMINI_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    response_mime_type="application/json",
-                    response_schema=ContractAnalysis,
-                    temperature=0.1,
-                ),
-            )
+        # Model candidates with primary model first
+        models_to_try = [settings.GEMINI_MODEL]
+        for fallback in ["gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-pro"]:
+            if fallback not in models_to_try:
+                models_to_try.append(fallback)
 
-            raw_json = response.text
-            data = json.loads(raw_json)
+        last_error = None
 
-            # Ensure ID is unique if missing
-            if not data.get("id"):
-                data["id"] = f"analysis-{uuid.uuid4().hex[:8]}"
-            data["fileName"] = file_name
+        for model_name in models_to_try:
+            for attempt in range(2):
+                try:
+                    logger.info("Calling Gemini with model '%s' (attempt %d/2)...", model_name, attempt + 1)
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            response_mime_type="application/json",
+                            response_schema=ContractAnalysis,
+                            temperature=0.1,
+                        ),
+                    )
 
-            # Calculate stats
-            clauses = data.get("clauses", [])
-            data["stats"] = {
-                "totalClauses": len(clauses),
-                "reviewCount": sum(1 for c in clauses if c.get("severity") == "MEDIUM"),
-                "redFlagCount": sum(1 for c in clauses if c.get("severity") == "HIGH"),
-            }
+                    raw_json = response.text
+                    data = json.loads(raw_json)
 
-            return ContractAnalysis.model_validate(data)
+                    # Ensure ID is unique if missing
+                    if not data.get("id"):
+                        data["id"] = f"analysis-{uuid.uuid4().hex[:8]}"
+                    data["fileName"] = file_name
 
-        except Exception as e:
-            logger.error("Gemini API analysis failed: %s. Falling back to structured mock data.", str(e))
-            return get_mock_contract_analysis(file_name=file_name, text_snippet=contract_text[:500])
+                    # Calculate stats
+                    clauses = data.get("clauses", [])
+                    data["stats"] = {
+                        "totalClauses": len(clauses),
+                        "reviewCount": sum(1 for c in clauses if c.get("severity") == "MEDIUM"),
+                        "redFlagCount": sum(1 for c in clauses if c.get("severity") == "HIGH"),
+                    }
+
+                    return ContractAnalysis.model_validate(data)
+
+                except Exception as e:
+                    last_error = e
+                    err_str = str(e)
+                    logger.warning("Gemini call with model %s failed on attempt %d: %s", model_name, attempt + 1, err_str)
+
+                    # Check for transient server load
+                    if any(code in err_str for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "high demand"]):
+                        await asyncio.sleep(1.5 * (attempt + 1))
+                        continue
+                    else:
+                        # Non-transient error for this model (e.g. 404), advance to next fallback model
+                        break
+
+        # If all attempts across all models failed, do NOT return mock data! Return a clear HTTP error.
+        logger.error("All Gemini API attempts exhausted. Last error: %s", str(last_error))
+        raise HTTPException(
+            status_code=503,
+            detail="The Gemini AI service is currently experiencing high demand. Please try uploading your document again in a few moments."
+        )
 
     async def ask_question(
         self,

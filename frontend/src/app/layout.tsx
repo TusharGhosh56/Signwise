@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AnalysisProvider } from "@/context/analysis-context";
+
 export default function RootLayout({
   children,
 }: {
@@ -38,12 +40,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sansFont.variable} ${serifFont.variable} ${monoFont.variable} dark h-full antialiased`}
+      className={`${sansFont.variable} ${serifFont.variable} ${monoFont.variable} light h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {/* Subtle grain texture for print-magazine feel */}
         <div className="noise-overlay" aria-hidden="true" />
-        {children}
+        <AnalysisProvider>{children}</AnalysisProvider>
       </body>
     </html>
   );

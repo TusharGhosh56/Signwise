@@ -29,16 +29,23 @@ export async function checkBackendHealth(): Promise<BackendHealthResponse | null
 }
 
 /**
- * Upload a contract file (PDF or text) to the backend for structured AI analysis
+ * Upload a contract file (PDF, DOCX, or text) to the backend for structured AI analysis
  */
 export async function analyzeContractFile(file: File): Promise<ContractAnalysis> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE_URL}/api/analyze/upload`, {
-    method: "POST",
-    body: formData,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}/api/analyze/upload`, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (err: unknown) {
+    throw new Error(
+      `Cannot connect to the Signwise backend at ${API_BASE_URL}. Please ensure the backend server is running.`
+    );
+  }
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
@@ -57,14 +64,21 @@ export async function analyzeContractText(
   text: string,
   fileName: string = "Pasted_Contract.txt"
 ): Promise<ContractAnalysis> {
-  const res = await fetch(`${API_BASE_URL}/api/analyze/text`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ text, fileName }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}/api/analyze/text`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ text, fileName }),
+    });
+  } catch (err: unknown) {
+    throw new Error(
+      `Cannot connect to the Signwise backend at ${API_BASE_URL}. Please ensure the backend server is running.`
+    );
+  }
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
@@ -84,18 +98,25 @@ export async function askContractQuestion(
   documentText?: string,
   analysis?: ContractAnalysis
 ): Promise<ChatQueryResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      question,
-      documentText,
-      analysis,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        question,
+        documentText,
+        analysis,
+      }),
+    });
+  } catch (err: unknown) {
+    throw new Error(
+      `Cannot connect to the Signwise backend at ${API_BASE_URL}. Please ensure the backend server is running.`
+    );
+  }
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));

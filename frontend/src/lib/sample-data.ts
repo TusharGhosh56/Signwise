@@ -92,6 +92,42 @@ export const SAMPLE_CONTRACTS: Record<string, ContractAnalysis> = {
           "Is the company willing to limit this non-compete to direct client solicitation rather than a blanket industry bar?",
         severity: "MEDIUM",
       },
+      {
+        id: "c-5",
+        title: "Guaranteed Base Salary & Bi-Weekly Payroll",
+        category: "COMPENSATION",
+        sectionRef: "Section 3.1",
+        pageNumber: 2,
+        originalSnippet:
+          "The Company shall pay Employee an annualized base salary of $145,000 USD, payable semi-monthly via direct deposit in accordance with standard payroll practices, subject to statutory deductions.",
+        whatItSays:
+          "Your $145,000 base salary is guaranteed, unconditional, and paid on a regular bi-weekly schedule.",
+        whatItMeans:
+          "Your base compensation cannot be unilaterally cut or delayed; it is legally protected regardless of company performance.",
+        whyItMatters:
+          "Provides rock-solid financial predictability with standard market-norm payroll protections.",
+        whatToAsk:
+          "Accept as written. This is a fair, standard market provision.",
+        severity: "LOW",
+      },
+      {
+        id: "c-6",
+        title: "Day-One Comprehensive Healthcare & 401(k) Match",
+        category: "BENEFITS",
+        sectionRef: "Section 4.1",
+        pageNumber: 3,
+        originalSnippet:
+          "Employee shall be eligible from their start date to participate in Company health, dental, and vision insurance plans with 90% employer-subsidized premiums, alongside an immediate 4% 401(k) retirement match.",
+        whatItSays:
+          "You receive full medical, dental, vision coverage and a 4% 401(k) match starting on your very first day.",
+        whatItMeans:
+          "No waiting period or probation delay before health insurance kicks in. Company covers 90% of premiums.",
+        whyItMatters:
+          "Protects you and your dependents immediately and exceeds typical market benefit packages.",
+        whatToAsk:
+          "Accept as written. This is strongly in your favor.",
+        severity: "LOW",
+      },
     ],
     obligations: {
       userMust: [

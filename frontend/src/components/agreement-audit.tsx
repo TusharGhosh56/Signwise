@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { SAMPLE_CONTRACTS } from "@/lib/sample-data";
 import { ContractAnalysis, ClauseBreakdown } from "@/types/contract";
 import {
@@ -14,6 +15,7 @@ import {
   Loader2,
   AlertTriangle,
   Sparkles,
+  ArrowRight,
 } from "lucide-react";
 
 interface AgreementAuditProps {
@@ -185,7 +187,7 @@ export function AgreementAudit({
         {isAnalyzing && (
           <div className="py-24 rounded-lg border border-white/[0.08] bg-[var(--ink-surface)] flex flex-col items-center justify-center text-center px-6">
             <Loader2 className="h-8 w-8 text-[var(--gold)] animate-spin mb-4" />
-            <h3 className="headline-editorial text-xl font-normal text-white">
+            <h3 className="headline-editorial text-xl font-normal text-[var(--paper)]">
               Parsing and auditing agreement...
             </h3>
             <p className="text-xs font-mono text-[var(--paper-muted)] mt-2 max-w-md">
@@ -205,7 +207,7 @@ export function AgreementAudit({
               <span className="font-mono text-xs text-[var(--paper-muted)] tracking-wider uppercase font-semibold">
                 {contract.fileName}
               </span>
-              <h3 className="text-base font-semibold text-white mt-0.5">
+              <h3 className="text-base font-semibold text-[var(--paper)] mt-0.5">
                 {contract.documentTitle}
               </h3>
             </div>
@@ -315,7 +317,7 @@ export function AgreementAudit({
                         </p>
                         <div className="border-t border-white/[0.06] pt-3">
                           <p className="text-[13px] text-[var(--paper-muted)] leading-relaxed font-normal">
-                            <strong className="text-white font-semibold">
+                            <strong className="text-[var(--paper)] font-semibold">
                               Why it matters:
                             </strong>{" "}
                             {clause.whyItMatters}
@@ -380,6 +382,23 @@ export function AgreementAudit({
                 <span>{item}</span>
               </div>
             ))}
+          </div>
+
+          {/* Link to Dedicated Analysis Page */}
+          <div className="mt-12 pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h4 className="text-[var(--paper)] font-medium text-base">Want the full intelligence dossier?</h4>
+              <p className="text-xs text-[var(--paper-dim)] mt-0.5">
+                Inspect What&apos;s Right vs. What&apos;s Wrong, obligations ledger, financial clawbacks, and grounded Q&amp;A.
+              </p>
+            </div>
+            <Link
+              href="/analysis"
+              className="btn-editorial text-xs py-2.5 px-5 font-mono flex items-center gap-2 tracking-wider uppercase whitespace-nowrap shadow-sm hover:brightness-110"
+            >
+              <span>Open Dedicated Audit Page</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[var(--gold)]" />
+            </Link>
           </div>
         </div>
       </>

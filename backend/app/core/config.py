@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # Google Gemini AI configuration
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash"
+    GEMINI_MODEL: str = "gemini-3.6-flash"
 
     # CORS configuration
     CORS_ORIGINS: Union[List[str], str] = [

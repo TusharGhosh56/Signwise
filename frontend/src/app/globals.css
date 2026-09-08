@@ -1,0 +1,366 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════
+   SIGNWISE — EDITORIAL DESIGN SYSTEM
+   "The Legal Broadsheet"
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  /* Rich Dark Surfaces (Lifted from flat black for depth and contrast) */
+  --ink: #0a0b10;
+  --ink-raised: #13151f;
+  --ink-surface: #1a1d2b;
+  --ink-highlight: #222638;
+
+  /* High-Contrast Crisp Paper/Text Scale */
+  --paper: #f8f9fa;            /* Primary titles & high-emphasis text */
+  --paper-dim: #d1d5db;        /* Primary body copy & descriptions (~12:1 contrast) */
+  --paper-muted: #9ca3af;      /* Secondary text, labels, mono badges (~7:1 contrast) */
+  --paper-faint: #6b7280;      /* Tertiary metadata & subtle dividers (~4.6:1 contrast) */
+
+  /* Luminous Warm Gold Accent */
+  --gold: #dfb15b;
+  --gold-hover: #edd18c;
+  --gold-dim: rgba(223, 177, 91, 0.65);
+  --gold-faint: rgba(223, 177, 91, 0.2);
+  --gold-ghost: rgba(223, 177, 91, 0.08);
+
+  /* High-Visibility Functional Signals */
+  --signal-danger: #f87171;
+  --signal-danger-bg: rgba(248, 113, 113, 0.08);
+  --signal-danger-border: rgba(248, 113, 113, 0.3);
+  --signal-safe: #34d399;
+  --signal-safe-bg: rgba(52, 211, 153, 0.08);
+  --signal-safe-border: rgba(52, 211, 153, 0.3);
+  --signal-caution: #fbbf24;
+  --signal-caution-bg: rgba(251, 191, 36, 0.08);
+  --signal-caution-border: rgba(251, 191, 36, 0.3);
+
+  /* Typography */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+}
+
+@theme inline {
+  --color-background: var(--ink);
+  --color-foreground: var(--paper);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+}
+
+/* ─── BASE ──────────────────────────────────────── */
+
+body {
+  background-color: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--gold-faint);
+  color: var(--paper);
+}
+
+/* ─── TYPOGRAPHY SYSTEM ─────────────────────────── */
+
+.font-serif {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), "Courier New", monospace;
+}
+
+/* Editorial headline: massive, confident serif */
+.headline-editorial {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--paper);
+}
+
+/* Monospaced label: readable legal document metadata */
+.label-mono {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+}
+
+/* Pull-quote */
+.pull-quote {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--paper-dim);
+}
+
+/* ─── EDITORIAL LAYOUT ──────────────────────────── */
+
+/* Chapter divider rule */
+.chapter-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.08) 80%,
+    transparent
+  );
+  border: none;
+}
+
+/* Section chapter marker */
+.chapter-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.chapter-marker::before {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--gold-dim);
+}
+
+/* ─── NOISE TEXTURE OVERLAY ─────────────────────── */
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.012;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ─── SCROLL-DRIVEN REVEAL ANIMATIONS ────────────── */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  animation: reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 35%;
+}
+
+.reveal-fade {
+  animation: reveal-fade 0.6s ease both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 30%;
+}
+
+/* Fallback for browsers without scroll-driven animations */
+@supports not (animation-timeline: view()) {
+  .reveal,
+  .reveal-fade {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─── INTERACTIVE ELEMENTS ──────────────────────── */
+
+/* Subtle underline link */
+.link-editorial {
+  color: var(--gold);
+  text-decoration: none;
+  background-image: linear-gradient(var(--gold-dim), var(--gold-dim));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.link-editorial:hover {
+  background-size: 100% 1px;
+}
+
+/* Button reset for editorial actions */
+.btn-editorial {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #0a0b10;
+  background: var(--paper);
+  padding: 13px 26px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.btn-editorial:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+.btn-editorial:active {
+  transform: translateY(0);
+}
+
+/* Ghost button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--gold-ghost);
+  border: 1px solid var(--gold-dim);
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--gold-faint);
+  border-color: var(--gold);
+  color: #ffffff;
+}
+
+/* ─── PRODUCT CARD SYSTEM (for hero slideshow) ──── */
+
+.product-card {
+  background: var(--ink-raised);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.product-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* Recessed document area within product card */
+.document-recess {
+  background: var(--ink-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.document-recess::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 30%
+  );
+  pointer-events: none;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ─── PROGRESS BAR (for slideshow) ──────────────── */
+
+.progress-track {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+/* Animated fill for auto-advance */
+@keyframes progress-sweep {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.progress-auto {
+  animation: progress-sweep 7s linear;
+}
+
+/* ─── STATUS INDICATORS (product UI only) ────────── */
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot-danger { background: var(--signal-danger); }
+.status-dot-safe { background: var(--signal-safe); }
+.status-dot-caution { background: var(--signal-caution); }

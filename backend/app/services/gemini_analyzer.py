@@ -10,7 +10,6 @@ from app.schemas.contract import (
     AnalysisStats,
     ChatQueryResponse,
 )
-from app.services.mock_data import get_mock_contract_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -80,11 +79,14 @@ class GeminiAnalyzerService:
     ) -> ContractAnalysis:
         """
         Runs comprehensive contract analysis using Gemini with structured output.
-        Retries transient errors and fails transparently instead of returning fake data.
+        Fails transparently with an error if unconfigured or if API fails.
         """
         if not self.client:
-            logger.warning("No valid GEMINI_API_KEY configured. Returning mock analysis for local offline demo.")
-            return get_mock_contract_analysis(file_name=file_name, text_snippet=contract_text[:500])
+            logger.error("No valid GEMINI_API_KEY configured.")
+            raise HTTPException(
+                status_code=500,
+                detail="Backend AI engine is not configured. Please configure GEMINI_API_KEY in backend environment variables."
+            )
 
         from google.genai import types
 
@@ -169,10 +171,9 @@ File Name: {file_name}
         Answers a targeted question regarding the contract.
         """
         if not self.client:
-            return ChatQueryResponse(
-                answer="Signwise Analysis Mode: Based on Section 5.1 of your agreement, resignation requires written notice. To enable live Gemini AI answers, please configure GEMINI_API_KEY in backend/.env.",
-                referencedSectionRefs=["Section 5.1"],
-                suggestedAction="Request an amendment in writing before signing.",
+            raise HTTPException(
+                status_code=500,
+                detail="Backend AI engine is not configured. Please set GEMINI_API_KEY."
             )
 
         try:

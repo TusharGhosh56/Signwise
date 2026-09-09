@@ -36,6 +36,9 @@ import {
   Sun,
   Moon,
   Download,
+  FileQuestion,
+  Info,
+  FileCheck,
 } from "lucide-react";
 
 export default function AnalysisPage() {
@@ -48,6 +51,7 @@ export default function AnalysisPage() {
     theme,
     toggleTheme,
     analyzeFile,
+    loadPreset,
   } = useAnalysis();
 
   const [activeSection, setActiveSection] = useState<string>("broad-spectrum");
@@ -218,6 +222,108 @@ export default function AnalysisPage() {
 
   const asymmetry = getAsymmetryLabel(fairnessScore);
 
+  const isNonContract =
+    currentAnalysis?.documentCategory === "OTHER" ||
+    (currentAnalysis !== null &&
+      clauses.length === 0 &&
+      (currentAnalysis.whatYouAreGivingUp?.length || 0) === 0);
+
+  // Reusable Grounded Document Q&A Section
+  const renderChatSection = (isStandalone: boolean = false) => (
+    <section id="contract-chat" className="scroll-mt-36 space-y-8">
+      <div className="space-y-3">
+        <div className="chapter-marker">
+          {isStandalone ? "Document Q&A Assistant" : "Chapter VII — Grounded Document Inquiry"}
+        </div>
+        <h2 className="headline-editorial text-[clamp(1.75rem,3.5vw,2.75rem)] font-normal text-[var(--paper)]">
+          {isStandalone ? "Ask questions about this document." : (
+            <>
+              Ask any question about{" "}
+              <span className="italic text-[var(--gold)]">
+                this agreement.
+              </span>
+            </>
+          )}
+        </h2>
+        <p className="text-base text-[var(--paper-dim)] font-normal max-w-2xl">
+          {isStandalone
+            ? "Even though this file is not a binding legal contract, our AI intelligence can parse its contents, parameters, and details to answer your questions."
+            : "Responses are verified strictly against the clauses in your agreement and cite the exact section numbers."}
+        </p>
+      </div>
+
+      <div className="product-card rounded-xl border border-[var(--border-subtle)] p-6 sm:p-8 space-y-5">
+        {/* Chat History */}
+        {chatHistory.length > 0 && (
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2 document-recess rounded-lg p-5 border border-[var(--border-subtle)]">
+            {chatHistory.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex flex-col ${
+                  msg.role === "user" ? "items-end" : "items-start"
+                }`}
+              >
+                <div
+                  className={`max-w-xl p-4 rounded-lg text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-[var(--gold-ghost)] border border-[var(--gold-dim)] text-[var(--gold)] font-medium"
+                      : "document-recess text-[var(--paper)] border border-[var(--border-subtle)]"
+                  }`}
+                >
+                  {msg.text}
+
+                  {msg.citations && msg.citations.length > 0 && (
+                    <div className="mt-2.5 pt-2 border-t border-[var(--border-subtle)] flex items-center gap-2 label-mono text-[10px] text-[var(--gold)]">
+                      <span>VERIFIED CITATIONS:</span>
+                      {msg.citations.map((c, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 rounded bg-[var(--ink-surface)] border border-[var(--border-subtle)]"
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {isChatLoading && (
+              <div className="flex items-center gap-2 text-xs font-mono text-[var(--gold)] p-2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Scanning document text...</span>
+              </div>
+            )}
+            <div ref={chatBottomRef} />
+          </div>
+        )}
+
+        {/* Question Input Form */}
+        <form onSubmit={handleChatSubmit} className="flex gap-3">
+          <input
+            type="text"
+            value={chatQuestion}
+            onChange={(e) => setChatQuestion(e.target.value)}
+            placeholder={
+              isStandalone
+                ? "e.g. What guidelines or specifications are defined in this document?"
+                : "e.g. Can I still work on open-source projects? What happens if I resign early?"
+            }
+            className="flex-1 document-recess border border-[var(--border-subtle)] focus:border-[var(--gold)] rounded-lg px-4 py-3 text-sm text-[var(--paper)] placeholder:text-[var(--paper-muted)] outline-none transition-colors font-sans"
+          />
+          <button
+            type="submit"
+            disabled={!chatQuestion.trim() || isChatLoading}
+            className="btn btn-md btn-primary disabled:opacity-50"
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span>Inquire</span>
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+
   return (
     <div className="min-h-screen bg-[var(--ink)] text-[var(--paper)] flex flex-col selection:bg-[var(--gold-faint)] selection:text-[var(--paper)]">
       {/* Hidden File Input */}
@@ -272,7 +378,7 @@ export default function AnalysisPage() {
             </button>
 
             {/* Print / Export PDF button */}
-            {currentAnalysis && (
+            {currentAnalysis && !isNonContract && (
               <button
                 onClick={() => window.print()}
                 disabled={isAnalyzing}
@@ -296,8 +402,8 @@ export default function AnalysisPage() {
         </div>
       </header>
 
-      {/* Sticky Chapter Sub-Nav (Shown only when analysis is loaded) */}
-      {currentAnalysis && (
+      {/* Sticky Chapter Sub-Nav (Shown only when analysis is loaded and is a contract) */}
+      {currentAnalysis && !isNonContract && (
         <nav className="sticky top-16 z-40 w-full border-b border-[var(--border-subtle)] bg-[var(--ink-raised)]/95 backdrop-blur-md overflow-x-auto screen-only">
           <div className="mx-auto flex h-12 max-w-6xl items-center gap-6 px-6 text-xs font-mono tracking-wider uppercase whitespace-nowrap">
             {[
@@ -398,8 +504,137 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* INTERACTIVE WEB VIEW: HIDDEN ON PRINT */}
-        {currentAnalysis && (
+        {/* NON-CONTRACT INFORMATIONAL VIEW: Displayed when uploaded file is not a binding agreement */}
+        {currentAnalysis && isNonContract && (
+          <div className="screen-only space-y-12 max-w-4xl mx-auto pt-4">
+            {/* Non-Contract Hero Notice Card */}
+            <div className="product-card rounded-2xl p-8 sm:p-12 border border-[var(--border-subtle)] space-y-8 shadow-2xl relative overflow-hidden">
+              {/* Decorative background glow */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--gold-faint)] rounded-full blur-3xl pointer-events-none -mr-32 -mt-32" />
+
+              {/* Top Header Badge */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--gold-faint)] border border-[var(--gold)]/30 flex items-center justify-center text-[var(--gold)]">
+                    <FileQuestion className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="label-mono text-xs font-bold text-[var(--gold)] tracking-wider block">
+                      INFORMATIONAL / NON-AGREEMENT FILE
+                    </span>
+                    <span className="text-xs text-[var(--paper-muted)] font-mono">
+                      No Contractual Liabilities Detected
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--ink-surface)] border border-[var(--border-subtle)] font-mono text-xs text-[var(--paper-dim)]">
+                  <FileText className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  <span>{currentAnalysis.fileName}</span>
+                </div>
+              </div>
+
+              {/* Main Title & Extracted Summary */}
+              <div className="space-y-4 relative z-10">
+                <h1 className="headline-editorial text-3xl sm:text-4xl text-[var(--paper)] font-normal leading-tight">
+                  {currentAnalysis.documentTitle}
+                </h1>
+                <div className="p-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--ink-surface)]/60 leading-relaxed text-[var(--paper-dim)] text-sm sm:text-base font-sans">
+                  <p>{currentAnalysis.headlineSummary}</p>
+                </div>
+              </div>
+
+              {/* Explanatory Notice */}
+              <div className="rounded-xl p-6 border-l-4 border-l-[var(--gold)] bg-[var(--gold-faint)] border border-[var(--gold)]/20 space-y-2.5 relative z-10">
+                <div className="flex items-center gap-2 text-[var(--gold)] font-mono text-xs font-bold tracking-wider">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span>WHY ARE THERE NO RISK SCORES OR CLAUSES?</span>
+                </div>
+                <p className="text-sm text-[var(--paper)] leading-relaxed font-sans">
+                  Signwise is purpose-built to audit <strong>binding legal agreements</strong> (such as Employment Offer Letters, Leases, NDAs, Consulting Contracts, and Terms of Service) to uncover asymmetric legal risks and hidden liabilities.
+                </p>
+                <p className="text-xs text-[var(--paper-muted)] leading-relaxed font-sans">
+                  Because this uploaded document is an informational or reference file, it does not contain counterparty covenants, personal liabilities, or restrictive clauses. Commercial fairness scoring and non-market trap analyses do not apply.
+                </p>
+              </div>
+
+              {/* 3 Quick Vitals */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                <div className="document-recess rounded-xl p-4 border border-[var(--border-subtle)] space-y-1.5">
+                  <div className="label-mono text-[10px] text-[var(--signal-safe)] flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>RESTRICTIVE COVENANTS</span>
+                  </div>
+                  <div className="headline-editorial text-2xl text-[var(--paper)]">
+                    0 Detected
+                  </div>
+                  <p className="text-[11px] text-[var(--paper-muted)] font-mono">
+                    No binding personal restrictions
+                  </p>
+                </div>
+
+                <div className="document-recess rounded-xl p-4 border border-[var(--border-subtle)] space-y-1.5">
+                  <div className="label-mono text-[10px] text-[var(--signal-safe)] flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>FINANCIAL LIABILITIES</span>
+                  </div>
+                  <div className="headline-editorial text-2xl text-[var(--paper)]">
+                    None
+                  </div>
+                  <p className="text-[11px] text-[var(--paper-muted)] font-mono">
+                    Zero payment/penalty liabilities
+                  </p>
+                </div>
+
+                <div className="document-recess rounded-xl p-4 border border-[var(--border-subtle)] space-y-1.5">
+                  <div className="label-mono text-[10px] text-[var(--gold)] flex items-center gap-1.5">
+                    <Scale className="h-3.5 w-3.5" />
+                    <span>DOCUMENT STATUS</span>
+                  </div>
+                  <div className="headline-editorial text-2xl text-[var(--paper)]">
+                    Safe
+                  </div>
+                  <p className="text-[11px] text-[var(--paper-muted)] font-mono">
+                    Non-binding reference file
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions: Upload Contract or Load Presets */}
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 relative z-10">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn btn-lg btn-primary"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload a Contract or Agreement</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-[var(--paper-muted)]">Test demo agreement:</span>
+                  <button
+                    onClick={() => loadPreset("employment")}
+                    className="btn btn-sm btn-secondary"
+                  >
+                    Employment Offer
+                  </button>
+                  <button
+                    onClick={() => loadPreset("lease")}
+                    className="btn btn-sm btn-secondary"
+                  >
+                    Lease Agreement
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Document Q&A Assistant */}
+            {renderChatSection(true)}
+          </div>
+        )}
+
+        {/* INTERACTIVE WEB VIEW FOR CONTRACTS: HIDDEN ON PRINT */}
+        {currentAnalysis && !isNonContract && (
           <div className="screen-only space-y-24">
             {/* ========================================================================= */}
             {/* CHAPTER I: THE BROAD SPECTRUM                                             */}
@@ -1136,96 +1371,15 @@ export default function AnalysisPage() {
             {/* Chapter Break Rule */}
             <div className="chapter-rule mx-auto max-w-6xl" />
 
-            {/* ========================================================================= */}
-            {/* CHAPTER VII: GROUNDED DOCUMENT INQUIRY (Q&A CHAT)                          */}
-            {/* ========================================================================= */}
-            <section id="contract-chat" className="scroll-mt-36 space-y-8">
-              <div className="space-y-3">
-                <div className="chapter-marker">Chapter VII &mdash; Grounded Document Inquiry</div>
-                <h2 className="headline-editorial text-[clamp(1.75rem,3.5vw,2.75rem)] font-normal text-[var(--paper)]">
-                  Ask any question about{" "}
-                  <span className="italic text-[var(--gold)]">
-                    this agreement.
-                  </span>
-                </h2>
-                <p className="text-base text-[var(--paper-dim)] font-normal max-w-2xl">
-                  Responses are verified strictly against the clauses in your agreement and cite the exact section numbers.
-                </p>
-              </div>
-
-              <div className="product-card rounded-xl border border-[var(--border-subtle)] p-6 sm:p-8 space-y-5">
-                {/* Chat History */}
-                {chatHistory.length > 0 && (
-                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2 document-recess rounded-lg p-5 border border-[var(--border-subtle)]">
-                    {chatHistory.map((msg, i) => (
-                      <div
-                        key={i}
-                        className={`flex flex-col ${
-                          msg.role === "user" ? "items-end" : "items-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-xl p-4 rounded-lg text-sm leading-relaxed ${
-                            msg.role === "user"
-                              ? "bg-[var(--gold-ghost)] border border-[var(--gold-dim)] text-[var(--gold)] font-medium"
-                              : "document-recess text-[var(--paper)] border border-[var(--border-subtle)]"
-                          }`}
-                        >
-                          {msg.text}
-
-                          {msg.citations && msg.citations.length > 0 && (
-                            <div className="mt-2.5 pt-2 border-t border-[var(--border-subtle)] flex items-center gap-2 label-mono text-[10px] text-[var(--gold)]">
-                              <span>VERIFIED CITATIONS:</span>
-                              {msg.citations.map((c, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-1.5 py-0.5 rounded bg-[var(--ink-surface)] border border-[var(--border-subtle)]"
-                                >
-                                  {c}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {isChatLoading && (
-                      <div className="flex items-center gap-2 text-xs font-mono text-[var(--gold)] p-2">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        <span>Scanning agreement text...</span>
-                      </div>
-                    )}
-                    <div ref={chatBottomRef} />
-                  </div>
-                )}
-
-                {/* Question Input Form */}
-                <form onSubmit={handleChatSubmit} className="flex gap-3">
-                  <input
-                    type="text"
-                    value={chatQuestion}
-                    onChange={(e) => setChatQuestion(e.target.value)}
-                    placeholder="e.g. Can I still work on open-source projects? What happens if I resign early?"
-                    className="flex-1 document-recess border border-[var(--border-subtle)] focus:border-[var(--gold)] rounded-lg px-4 py-3 text-sm text-[var(--paper)] placeholder:text-[var(--paper-muted)] outline-none transition-colors font-sans"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!chatQuestion.trim() || isChatLoading}
-                    className="btn btn-md btn-primary disabled:opacity-50"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    <span>Inquire</span>
-                  </button>
-                </form>
-              </div>
-            </section>
+            {/* Chapter VII: Grounded Document Inquiry */}
+            {renderChatSection(false)}
           </div>
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         {/* PRINT-ONLY EXECUTIVE LEGAL REPORT (Rendered solely during PDF Export)  */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {currentAnalysis && (
+        {currentAnalysis && !isNonContract && (
           <div className="print-only w-full max-w-4xl mx-auto p-4 sm:p-8 bg-white text-slate-900 font-sans space-y-8">
             {/* Masthead */}
             <div className="border-b-2 border-slate-900 pb-4 flex items-baseline justify-between">

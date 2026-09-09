@@ -35,11 +35,11 @@ export function TrustVault() {
             ].map((item) => (
               <div
                 key={item.mark}
-                className="flex items-start gap-4 py-3.5 border-b border-white/[0.08] last:border-b-0"
+                className="flex items-start gap-4 py-3.5 border-b border-[var(--border-subtle)] last:border-b-0"
               >
                 <div className="w-2 h-2 rounded-full bg-[var(--gold)] mt-2 shrink-0 shadow-[0_0_8px_rgba(223,177,91,0.5)]" />
                 <div>
-                  <div className="text-base font-semibold text-white">
+                  <div className="text-base font-semibold text-[var(--paper)]">
                     {item.mark}
                   </div>
                   <div className="text-sm text-[var(--paper-dim)] font-normal mt-0.5">
@@ -52,7 +52,7 @@ export function TrustVault() {
         </div>
 
         {/* Legal Disclaimer — footnote style */}
-        <div className="reveal mt-16 pt-6 border-t border-white/[0.08]">
+        <div className="reveal mt-16 pt-6 border-t border-[var(--border-subtle)]">
           <p className="text-xs text-[var(--paper-muted)] leading-relaxed font-normal max-w-3xl">
             <span className="font-mono text-xs text-[var(--paper-dim)] font-bold tracking-wider uppercase mr-2">
               Important:

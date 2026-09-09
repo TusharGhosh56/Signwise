@@ -1,28 +1,49 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { HeroSlideshow } from "@/components/hero-slideshow";
-import { AgreementAudit } from "@/components/agreement-audit";
+import { CapabilitiesSection } from "@/components/capabilities";
 import { ThreeQuestions } from "@/components/three-questions";
 import { TestimonialsSection } from "@/components/testimonials";
 import { TrustVault } from "@/components/trust-vault";
 import { FooterEditorial } from "@/components/footer-editorial";
+import { useAnalysis } from "@/context/analysis-context";
 
 export default function HomePage() {
-  const scrollToAudit = () => {
-    const el = document.getElementById("dossier-preview");
-    el?.scrollIntoView({ behavior: "smooth" });
+  const router = useRouter();
+  const { analyzeFile, isAnalyzing } = useAnalysis();
+
+  const handleFileUpload = async (file: File) => {
+    // Navigate immediately to dedicated analysis page to show analysis progress
+    router.push("/analysis");
+    try {
+      await analyzeFile(file);
+    } catch (err: unknown) {
+      console.error("Upload error:", err);
+    }
+  };
+
+  const handleReviewClick = () => {
+    router.push("/analysis");
   };
 
   return (
     <div className="relative min-h-screen">
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar onUploadClick={scrollToAudit} />
+        <Navbar
+          onUploadClick={handleReviewClick}
+          onFileSelected={handleFileUpload}
+        />
 
         <main className="flex-1">
           {/* I. The Opening Statement */}
-          <HeroSlideshow onUploadClick={scrollToAudit} />
+          <HeroSlideshow
+            onUploadClick={handleReviewClick}
+            onFileSelected={handleFileUpload}
+            isAnalyzing={isAnalyzing}
+          />
 
           {/* Chapter break */}
           <div className="chapter-rule mx-auto max-w-5xl" />
@@ -33,8 +54,11 @@ export default function HomePage() {
           {/* Chapter break */}
           <div className="chapter-rule mx-auto max-w-5xl" />
 
-          {/* III. The Dossier */}
-          <AgreementAudit />
+          {/* III. Core Capabilities & Protections */}
+          <CapabilitiesSection
+            onFileSelect={handleFileUpload}
+            onReviewClick={handleReviewClick}
+          />
 
           {/* Chapter break */}
           <div className="chapter-rule mx-auto max-w-5xl" />

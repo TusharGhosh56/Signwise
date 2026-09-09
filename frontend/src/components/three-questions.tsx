@@ -43,7 +43,7 @@ export function ThreeQuestions() {
           {questions.map((q) => (
             <div
               key={q.number}
-              className="reveal grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-12 sm:py-14 border-t border-white/[0.08] first:border-t-0 first:pt-0"
+              className="reveal grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-12 sm:py-14 border-t border-[var(--border-subtle)] first:border-t-0 first:pt-0"
             >
               {/* Large question number */}
               <div className="md:col-span-2">

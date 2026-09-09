@@ -6,7 +6,8 @@ export type DocumentCategory =
   | "FREELANCE_SERVICES"
   | "FINANCIAL_LOAN"
   | "NDA_CONFIDENTIALITY"
-  | "CONSUMER_TERMS";
+  | "CONSUMER_TERMS"
+  | "OTHER";
 
 export interface ClauseBreakdown {
   id: string;
@@ -65,4 +66,16 @@ export interface ContractAnalysis {
   };
   financialTerms: FinancialItem[];
   questionsBeforeSigning: SuggestedQuestionItem[];
+}
+
+export interface ChatQueryRequest {
+  question: string;
+  documentText?: string;
+  analysis?: ContractAnalysis;
+}
+
+export interface ChatQueryResponse {
+  answer: string;
+  referencedSectionRefs?: string[];
+  suggestedAction?: string;
 }

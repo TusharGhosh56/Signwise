@@ -374,7 +374,7 @@ export function TestimonialsSection() {
     <section id="testimonials" className="py-24 sm:py-32 relative overflow-hidden">
       {/* ── 1. Expansive Cinematic Visual Showcase (Full-width editorial image) ── */}
       <div className="mx-auto max-w-6xl px-6 mb-24 sm:mb-32">
-        <div className="reveal rounded-2xl overflow-hidden border border-white/[0.1] bg-[var(--ink-raised)] relative shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]">
+        <div className="reveal rounded-2xl overflow-hidden border border-black/10 dark:border-white/[0.1] bg-[#0c0e14] relative shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]">
           <div className="relative h-[400px] sm:h-[500px] lg:h-[560px] w-full overflow-hidden">
             <Image
               src="/images/contract_ink_macro.jpg"
@@ -384,7 +384,7 @@ export function TestimonialsSection() {
               priority
             />
             {/* Rich vignette gradient overlays for depth and legibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-black/40 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080809] via-black/40 to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-black/50 pointer-events-none" />
 
             {/* Overlaid Editorial Text */}
@@ -400,13 +400,12 @@ export function TestimonialsSection() {
                     The moment the ink dries, the leverage flips.
                   </span>&rdquo;
                 </blockquote>
-                <p className="text-sm sm:text-base text-[var(--paper-dim)] font-light leading-relaxed max-w-xl">
+                <p className="text-sm sm:text-base text-white/80 font-light leading-relaxed max-w-xl">
                   Most professionals discover restrictive covenants only after resigning, facing an IP dispute, or leaving bonuses on the table.
                 </p>
               </div>
 
-              <div className="text-[11px] font-mono text-[var(--paper-muted)] tracking-wider uppercase">
-                Clause Inspection Archive &mdash; Pre-Execution Case Studies
+              <div className="text-[11px] font-mono text-white/40 tracking-wider uppercase">
               </div>
             </div>
           </div>
@@ -422,29 +421,10 @@ export function TestimonialsSection() {
         onPointerCancel={handlePointerUp}
         className="reveal relative w-full h-[880px] sm:h-[960px] lg:h-[1020px] flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none"
       >
-        {/* Infinite Dot Grid Background */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-            backgroundPosition: `${pan.x % 32}px ${pan.y % 32}px`,
-          }}
-        />
-
-        {/* Soft radial vignette at edges to melt the canvas seamlessly into the dark page */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--ink)_88%)]" />
-
-        {/* Central Protective Vignette Mask (guarantees center headline is 100% readable) */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <div className="w-[620px] h-[380px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(8,8,9,0.85)_25%,rgba(8,8,9,0.45)_60%,transparent_80%)]" />
-        </div>
-
         {/* Central Anchor Title — unboxed, clean, authoritative */}
         <div className="relative z-20 flex flex-col items-center text-center max-w-xl px-6 pointer-events-none select-none">
           <div className="chapter-marker mb-3">Case Studies</div>
-          <h2 className="headline-editorial text-[clamp(2.25rem,4.5vw,3.75rem)] font-normal text-white leading-tight">
+          <h2 className="headline-editorial text-[clamp(2.25rem,4.5vw,3.75rem)] font-normal text-slate-900 dark:text-white leading-tight">
             Real Scenarios.{" "}
             <span className="italic text-[var(--gold)]">Real Leverage.</span>
           </h2>
@@ -489,19 +469,19 @@ export function TestimonialsSection() {
                       transition:
                         "opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.8s ease, box-shadow 0.8s ease",
                     }}
-                    className={`absolute w-[310px] sm:w-[350px] p-5 sm:p-6 rounded-xl pointer-events-auto cursor-pointer select-none ${
+                    className={`absolute w-[310px] sm:w-[350px] p-5 sm:p-6 rounded-xl pointer-events-auto cursor-pointer select-none canvas-card ${
                       isTargetSpotlight
-                        ? "bg-[var(--ink-surface)] border-2 border-[var(--gold)]/85 shadow-[0_0_55px_rgba(223,177,91,0.24),0_25px_50px_rgba(0,0,0,0.95)] z-30 scale-100 opacity-100"
+                        ? "card-spotlight bg-[var(--ink-surface)] border-2 border-[var(--gold)]/85 shadow-[0_0_55px_rgba(223,177,91,0.24),0_25px_50px_rgba(0,0,0,0.95)] z-30 scale-100 opacity-100"
                         : isAllLit
-                        ? "bg-[var(--ink-surface)]/95 border border-white/[0.18] shadow-[0_15px_35px_rgba(0,0,0,0.85)] z-20 scale-100 opacity-100 blur-none"
-                        : "bg-[var(--ink-raised)]/75 border border-white/[0.05] z-10 scale-[0.93] opacity-[0.20] blur-[0.3px] hover:opacity-50"
+                        ? "card-all-lit bg-[var(--ink-surface)]/95 border border-white/[0.18] shadow-[0_15px_35px_rgba(0,0,0,0.85)] z-20 scale-100 opacity-100 blur-none"
+                        : "card-dim bg-[var(--ink-raised)]/75 border border-white/[0.05] z-10 scale-[0.93] opacity-[0.20] blur-[0.3px] hover:opacity-50"
                     }`}
                   >
                     <div className="space-y-3.5 pointer-events-none">
                       {/* Author Header */}
                       <div className="flex items-center gap-3">
                         <div
-                          className={`relative h-11 w-11 rounded-full overflow-hidden border shrink-0 transition-all ${
+                          className={`relative h-11 w-11 rounded-full overflow-hidden border shrink-0 transition-all card-avatar ${
                             isTargetSpotlight
                               ? "border-[var(--gold)] ring-2 ring-[var(--gold)]/35"
                               : isAllLit
@@ -518,7 +498,7 @@ export function TestimonialsSection() {
                         </div>
                         <div>
                           <h4
-                            className={`text-sm font-semibold transition-colors ${
+                            className={`text-sm font-semibold transition-colors card-author ${
                               isLit
                                 ? "text-white"
                                 : "text-[var(--paper-dim)]"
@@ -534,7 +514,7 @@ export function TestimonialsSection() {
 
                       {/* Pull-quote Headline */}
                       <div
-                        className={`text-xs font-semibold leading-snug transition-colors ${
+                        className={`text-xs font-semibold leading-snug transition-colors card-headline ${
                           isLit
                             ? "text-white"
                             : "text-[var(--paper-dim)]"
@@ -544,7 +524,7 @@ export function TestimonialsSection() {
                       </div>
 
                       {/* Flagged Clause */}
-                      <div className="text-[11px] font-mono text-[var(--paper-muted)] pt-1 border-t border-white/[0.06] leading-tight">
+                      <div className="text-[11px] font-mono text-[var(--paper-muted)] pt-1 border-t border-white/[0.06] card-divider leading-tight">
                         Flagged:{" "}
                         <span
                           className={`font-medium transition-colors ${
@@ -559,7 +539,7 @@ export function TestimonialsSection() {
 
                       {/* Story Quote */}
                       <p
-                        className={`text-[13px] leading-relaxed font-normal transition-colors ${
+                        className={`text-[13px] leading-relaxed font-normal transition-colors card-quote ${
                           isLit
                             ? "text-[var(--paper)]"
                             : "text-[var(--paper-dim)]"
@@ -569,7 +549,7 @@ export function TestimonialsSection() {
                       </p>
 
                       {/* Negotiated Outcome */}
-                      <div className="pt-2.5 border-t border-white/[0.06]">
+                      <div className="pt-2.5 border-t border-white/[0.06] card-divider">
                         <div className="text-xs text-[var(--signal-safe)] font-mono flex items-baseline gap-1.5">
                           <span className="text-[var(--gold)] font-bold">
                             &rarr;

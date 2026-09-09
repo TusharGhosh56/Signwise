@@ -107,8 +107,12 @@ export const SLIDES: ClauseSlide[] = [
 
 export function HeroSlideshow({
   onUploadClick,
+  onFileSelected,
+  isAnalyzing,
 }: {
   onUploadClick: () => void;
+  onFileSelected?: (file: File) => void;
+  isAnalyzing?: boolean;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -139,6 +143,15 @@ export function HeroSlideshow({
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileSelected) {
+      onFileSelected(file);
+    } else {
+      onUploadClick();
+    }
   };
 
   const isSuspicious = activeSlide.status === "SUSPICIOUS";
@@ -177,15 +190,16 @@ export function HeroSlideshow({
                 type="file"
                 accept=".pdf,.docx,.txt"
                 className="hidden"
-                onChange={onUploadClick}
+                onChange={handleFileChange}
               />
 
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="btn-editorial w-fit"
+                disabled={isAnalyzing}
+                className="btn-editorial w-fit disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Upload className="h-4 w-4" />
-                <span>Upload Agreement</span>
+                <Upload className={`h-4 w-4 ${isAnalyzing ? "animate-spin" : ""}`} />
+                <span>{isAnalyzing ? "Analyzing Document..." : "Upload Document"}</span>
                 <ArrowRight className="h-4 w-4 ml-1 opacity-70" />
               </button>
 

@@ -36,6 +36,9 @@
   --signal-caution-bg: rgba(251, 191, 36, 0.08);
   --signal-caution-border: rgba(251, 191, 36, 0.3);
 
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
   /* Typography */
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
@@ -51,6 +54,11 @@
 }
 
 /* ─── BASE ──────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
 
 body {
   background-color: var(--ink);
@@ -210,11 +218,93 @@ body {
   background-size: 100% 1px;
 }
 
-/* Button reset for editorial actions */
+/* ─── UNIFIED BUTTON SYSTEM ──────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono), monospace;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Sizing */
+.btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  gap: 6px;
+}
+
+.btn-md {
+  height: 40px;
+  padding: 0 18px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  gap: 8px;
+}
+
+.btn-lg {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  gap: 10px;
+}
+
+/* Variants */
+.btn-primary {
+  background: var(--gold);
+  color: #090d16;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(179, 129, 40, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--gold-hover);
+  box-shadow: 0 4px 14px rgba(179, 129, 40, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--ink-surface);
+  color: var(--paper-dim);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-secondary:hover {
+  color: var(--paper);
+  border-color: var(--gold);
+  background: var(--ink-raised);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--paper-dim);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  color: var(--paper);
+  background: var(--gold-ghost);
+}
+
+/* Editorial legacy class updated to work with sizing */
 .btn-editorial {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
@@ -222,7 +312,7 @@ body {
   color: #0a0b10;
   background: var(--paper);
   padding: 13px 26px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -237,31 +327,6 @@ body {
 
 .btn-editorial:active {
   transform: translateY(0);
-}
-
-/* Ghost button */
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono), monospace;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--gold);
-  background: var(--gold-ghost);
-  border: 1px solid var(--gold-dim);
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-ghost:hover {
-  background: var(--gold-faint);
-  border-color: var(--gold);
-  color: #ffffff;
 }
 
 /* ─── PRODUCT CARD SYSTEM (for hero slideshow) ──── */
@@ -364,3 +429,245 @@ body {
 .status-dot-danger { background: var(--signal-danger); }
 .status-dot-safe { background: var(--signal-safe); }
 .status-dot-caution { background: var(--signal-caution); }
+
+/* ─── ENHANCED FLOATING SHADOWS ───────────────────── */
+
+.product-card {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* ─── WHITE GOLD LIGHT MODE THEME ─────────────────── */
+
+html.light,
+body.light {
+  --ink: #fbfbf9;
+  --ink-raised: #ffffff;
+  --ink-surface: #f4f4f0;
+  --ink-highlight: #eaeae4;
+
+  --paper: #090d16;
+  --paper-dim: #2b3445;
+  --paper-muted: #596780;
+  --paper-faint: #8c9bb0;
+
+  --gold: #b38128;
+  --gold-hover: #966718;
+  --gold-dim: rgba(179, 129, 40, 0.65);
+  --gold-faint: rgba(179, 129, 40, 0.15);
+  --gold-ghost: rgba(179, 129, 40, 0.07);
+
+  --signal-danger: #dc2626;
+  --signal-danger-bg: rgba(220, 38, 38, 0.07);
+  --signal-danger-border: rgba(220, 38, 38, 0.25);
+
+  --signal-safe: #16a34a;
+  --signal-safe-bg: rgba(22, 163, 74, 0.07);
+  --signal-safe-border: rgba(22, 163, 74, 0.25);
+
+  --signal-caution: #d97706;
+  --signal-caution-bg: rgba(217, 119, 6, 0.07);
+  --signal-caution-border: rgba(217, 119, 6, 0.25);
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.border-subtle {
+  border-color: var(--border-subtle);
+}
+
+.border-strong {
+  border-color: var(--border-strong);
+}
+
+html.light .product-card {
+  background: var(--ink-raised);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 55px -15px rgba(15, 23, 42, 0.12), 0 10px 20px -5px rgba(179, 129, 40, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+html.light .document-recess {
+  background: var(--ink-surface);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+html.light .document-recess::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, transparent 30%);
+}
+
+html.light .btn-editorial {
+  background: #090d16;
+  color: #fbfbf9;
+}
+
+html.light .btn-editorial:hover {
+  background: #1e293b;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+html.light .chapter-rule {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(0, 0, 0, 0.09) 20%,
+    rgba(0, 0, 0, 0.09) 80%,
+    transparent
+  );
+}
+
+html.light header {
+  background-color: rgba(251, 251, 249, 0.92) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light nav {
+  background-color: rgba(244, 244, 240, 0.95) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ─── TESTIMONIALS INFINITE CANVAS THEME-ADAPTATION ─── */
+
+/* Light mode card adaptations (purely scoped to canvas-card, dark mode untouched) */
+html.light .canvas-card.card-spotlight {
+  background: #ffffff !important;
+  border: 2px solid var(--gold) !important;
+  box-shadow: 0 0 45px rgba(179, 129, 40, 0.22), 0 20px 45px -10px rgba(15, 23, 42, 0.12) !important;
+}
+
+html.light .canvas-card.card-all-lit {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.10) !important;
+  box-shadow: 0 15px 35px -8px rgba(15, 23, 42, 0.08) !important;
+}
+
+html.light .canvas-card.card-dim {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.05) !important;
+  opacity: 0.38 !important;
+}
+
+html.light .canvas-card.card-dim:hover {
+  opacity: 0.90 !important;
+}
+
+html.light .canvas-card .card-author,
+html.light .canvas-card .card-headline {
+  color: #090d16 !important;
+}
+
+html.light .canvas-card .card-divider {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .canvas-card .card-avatar:not(.border-\[var\(--gold\)\]) {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html.light .noise-overlay {
+  opacity: 0.018;
+}
+
+/* ─── SCREEN VS PRINT MODES ───────────────────────── */
+
+.print-only {
+  display: none !important;
+}
+
+@media print {
+  .screen-only,
+  .no-print,
+  header,
+  nav,
+  footer,
+  button,
+  form,
+  input {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Force pristine white paper and rich dark ink for legal export */
+  :root,
+  html,
+  html.dark,
+  html.light,
+  body,
+  body.dark,
+  body.light,
+  .analysis-root {
+    --ink: #ffffff !important;
+    --ink-raised: #ffffff !important;
+    --ink-surface: #f8fafc !important;
+    --ink-highlight: #f1f5f9 !important;
+    --paper: #090d16 !important;
+    --paper-dim: #262c3d !important;
+    --paper-muted: #475569 !important;
+    --paper-faint: #64748b !important;
+    --border-subtle: #cbd5e1 !important;
+    --border-strong: #94a3b8 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #090d16 !important;
+  }
+
+  /* Strip all masks, glows, and shadow filters that break print engines */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    mask: none !important;
+    -webkit-mask: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  .product-card::before,
+  .product-card::after,
+  .document-recess::before,
+  .document-recess::after,
+  .noise-overlay {
+    display: none !important;
+    content: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #090d16 !important;
+    font-size: 10pt !important;
+    line-height: 1.35 !important;
+    overflow: visible !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  main {
+    display: block !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+  }
+
+  .break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

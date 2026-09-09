@@ -22,14 +22,14 @@ export function FooterEditorial() {
           <div className="flex items-center gap-6">
             {[
               { label: "Method", href: "#core-questions" },
-              { label: "Live Audit", href: "#dossier-preview" },
+              { label: "Capabilities", href: "#capabilities" },
               { label: "Stories", href: "#testimonials" },
               { label: "Trust", href: "#security-vault" },
             ].map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="text-xs font-mono tracking-wider uppercase text-[var(--paper-dim)] hover:text-white transition-colors duration-200 font-medium"
+                className="text-xs font-mono tracking-wider uppercase text-[var(--paper-dim)] hover:text-[var(--paper)] transition-colors duration-200 font-medium"
               >
                 {link.label}
               </a>
